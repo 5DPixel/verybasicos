@@ -1,0 +1,6 @@
+build/
+obj/
+gnu-efi/x86_64
+iso/
+os.iso
+config
