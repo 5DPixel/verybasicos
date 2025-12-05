@@ -1,3 +1,6 @@
 [submodule "gnu-efi"]
 	path = gnu-efi
 	url = https://github.com/ncroxon/gnu-efi
+[submodule "spleen"]
+	path = spleen
+	url = https://github.com/fcambus/spleen

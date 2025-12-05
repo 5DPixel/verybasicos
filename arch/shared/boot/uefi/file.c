@@ -1,5 +1,5 @@
-#include <boot/file.h>
-#include <boot/common.h>
+#include <boot/uefi/file.h>
+#include <boot/uefi/common.h>
 
 #ifdef __GNUC__
 #include <assert.h>

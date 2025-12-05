@@ -1,9 +1,8 @@
 #ifndef _BOOT_COMMON_H
 #define _BOOT_COMMON_H
 
-#define PLATFORM_UEFI 1
-
 #include <efi.h>
+#include <common.h>
 
 typedef struct {
 	EFI_HANDLE image;
@@ -12,9 +11,11 @@ typedef struct {
 	EFI_BOOT_SERVICES *gBS;
 	EFI_FILE_HANDLE root_volume;
 	EFI_FILE_HANDLE kernel_file;
+	EFI_GRAPHICS_OUTPUT_PROTOCOL *gop;
 	UINT8 *kernel_file_buffer;
 	UINT64 kernel_file_length;
 	int menu_entry_index;
+	framebuffer *fb;
 } boot_resources;
 
 #define SCANCODE_UP_ARROW 0x01

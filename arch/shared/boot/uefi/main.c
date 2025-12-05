@@ -1,10 +1,12 @@
 #include <efi.h>
 #include <elf.h>
 #include <boot/const.h>
-#include <boot/file.h>
+#include <boot/uefi/file.h>
 #include <common.h>
-#include <boot/common.h>
+#include <boot/uefi/common.h>
 #include <boot/menu.h>
+#include <boot/platform.h>
+#include <boot/uefi/framebuffer.h>
 
 EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 	(void)ImageHandle; /* cast to a void, because I'm aware some compilers will warn as the ImageHandle is unused */
@@ -18,6 +20,11 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
 	resources.gRT = SystemTable->RuntimeServices;
 	resources.image = ImageHandle;
 	resources.menu_entry_index = 0;
+
+	locate_gop(&resources);
+	set_gop_mode(&resources);
+	//enumerate_gop_modes(&resources);
+	return EFI_SUCCESS;
 
 	init_menu(&resources);
 

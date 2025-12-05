@@ -36,6 +36,7 @@ The following will provide instructions and prerequisites to build the operating
 * A MinGW GCC cross-compiler
 * A GCC cross-compiler for your desired architecture (only x86-64 is currently supported)
 * `qemu-system-[your arch]` for emulation
+* `bdf2psf` for building font assets
 
 ### Building from source
 
@@ -45,12 +46,12 @@ The following will provide instructions and prerequisites to build the operating
    ```
 2. Build submodules
     ```sh
-    make submodules -j$(nproc)
+    make submodules CPUS=$(nproc)
     ```
 
 3. Build the source
     ```sh
-    make -j$(nproc)
+    make CPUS=$(nproc)
     ```
 
 

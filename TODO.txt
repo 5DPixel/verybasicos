@@ -1,1 +1,2 @@
-Add script to fetch TianoCore OVMF firmware images instead of using provided
+- Add script to fetch TianoCore OVMF firmware images instead of using provided
+- Go into framebuffer mode and use font

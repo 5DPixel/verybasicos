@@ -1,5 +1,5 @@
 #include <common.h>
-#include <boot/common.h>
+#include <boot/uefi/common.h>
 
 void int_to_wstring(int n, short unsigned int *str){
     int i = 0, j = 0, k = 0;
@@ -29,6 +29,13 @@ int wstring_len(short unsigned int *str){
 	int i;
 	for(i = 0; str[i] != '\0'; i++);
 
+	return i;
+}
+
+int string_len(char *str){
+	int i;
+	for(i = 0; str[i] != '\0'; i++);
+	
 	return i;
 }
 
@@ -64,6 +71,14 @@ void string_to_wstringle(char *str, short unsigned int *wstr){
 void wstring_to_string(char *str, short unsigned int *wstr){
 	#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 	wstringle_to_string(str, wstr);
+	#else
+	#error "Big endian systems aren't yet supported!"
+	#endif
+}
+
+void string_to_wstring(char *str, short unsigned int *wstr){
+	#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+	string_to_wstringle(str, wstr);
 	#else
 	#error "Big endian systems aren't yet supported!"
 	#endif

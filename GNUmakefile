@@ -8,6 +8,8 @@ override OUTPUT_KERNEL = $(CURDIR)/build/kernel
 BOOT_TOOLCHAIN :=
 BOOT_TOOLCHAIN_PREFIX := x86_64-w64-mingw32-
 
+CPUS := 1
+
 KERNEL_TOOLCHAIN :=
 KERNEL_TOOLCHAIN_PREFIX :=
 
@@ -20,9 +22,9 @@ ARCH := $(shell uname -m)
 .PHONY: all
 all: $(OUTPUT_ISO)
 
-$(OUTPUT_ISO): GNUmakefile
-	$(MAKE) -C $(CURDIR)/arch/$(ARCH)/boot/uefi TOOLCHAIN=$(BOOT_TOOLCHAIN) TOOLCHAIN_PREFIX=$(BOOT_TOOLCHAIN_PREFIX)
-	$(MAKE) -C $(CURDIR)/arch/$(ARCH)
+$(OUTPUT_ISO): GNUmakefile submodules
+	$(MAKE) -C $(CURDIR)/arch/$(ARCH)/boot/uefi TOOLCHAIN=$(BOOT_TOOLCHAIN) TOOLCHAIN_PREFIX=$(BOOT_TOOLCHAIN_PREFIX) -j$(CPUS)
+	$(MAKE) -C $(CURDIR)/arch/$(ARCH) -j$(CPUS)
 	dd if=/dev/zero of=$(OUTPUT_ESP) bs=1k count=100000
 	mkdosfs -F 32 $(OUTPUT_ESP)
 	mmd -i $(OUTPUT_ESP) ::/EFI
@@ -47,7 +49,14 @@ clean:
 	rm -f $(OUTPUT_ISO)
 	rm -rf $(CURDIR)/build
 	rm -rf $(CURDIR)/obj
+	rm -f $(CURDIR)/assets/spleen8x16.psf
 
 .PHONY: submodules
 submodules:
-	$(MAKE) -C gnu-efi	
+	$(MAKE) -C gnu-efi
+	bdf2psf --fb spleen/spleen-8x16.bdf \
+		 /usr/share/bdf2psf/standard.equivalents \
+		 /usr/share/bdf2psf/ascii.set \
+		 256 \
+		 assets/spleen8x16.psf
+

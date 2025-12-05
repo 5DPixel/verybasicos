@@ -2,7 +2,7 @@
 #define _BOOT_MENU_H
 
 #include <efi.h>
-#include <boot/common.h>
+#include <boot/uefi/common.h>
 
 #define MENU_SCREEN_COLOUR EFI_TEXT_ATTR(EFI_WHITE, EFI_BLUE)
 #define SELECTED_TEXT_COLOUR EFI_TEXT_ATTR(EFI_BLUE, EFI_CYAN)
