@@ -12,6 +12,9 @@ CPUS := 1
 
 KERNEL_TOOLCHAIN :=
 KERNEL_TOOLCHAIN_PREFIX :=
+FONT_NAME := spleen-16x32.bdf
+FONT := $(addprefix $(CURDIR)/spleen/, $(FONT_NAME))
+FONT_OUT := $(addprefix $(CURDIR)/assets/fonts/, $(FONT_NAME:.bdf=.psf))
 
 IS_EFI := $(shell [ -d /sys/firmware/efi ])
 
@@ -31,6 +34,7 @@ $(OUTPUT_ISO): GNUmakefile submodules
 	mmd -i $(OUTPUT_ESP) ::/EFI/BOOT
 	mcopy -i $(OUTPUT_ESP) $(OUTPUT_BOOTLOADER) ::/EFI/BOOT/BOOTX64.EFI
 	mcopy -i $(OUTPUT_ESP) $(OUTPUT_KERNEL) ::/EFI/BOOT/kernel
+	mcopy -i $(OUTPUT_ESP) $(FONT_OUT) ::/EFI/BOOT/spleen.psf
 	mkdir -p iso
 	cp $(OUTPUT_ESP) iso
 	xorriso \
@@ -49,14 +53,15 @@ clean:
 	rm -f $(OUTPUT_ISO)
 	rm -rf $(CURDIR)/build
 	rm -rf $(CURDIR)/obj
-	rm -f $(CURDIR)/assets/spleen8x16.psf
+	rm -rf $(CURDIR)/assets/fonts
 
 .PHONY: submodules
 submodules:
 	$(MAKE) -C gnu-efi
-	bdf2psf --fb spleen/spleen-8x16.bdf \
+	mkdir -p assets/fonts
+	bdf2psf --fb $(FONT) \
 		 /usr/share/bdf2psf/standard.equivalents \
 		 /usr/share/bdf2psf/ascii.set \
 		 256 \
-		 assets/spleen8x16.psf
+		 $(FONT_OUT)
 

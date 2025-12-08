@@ -50,6 +50,12 @@ void fail_if(int condition, CHAR16 *wstr, EFI_SYSTEM_TABLE *gST){
     	return;
 }
 
+void copy_const_string(const char *str, char *str2){
+	int i;
+	for(i = 0; str[i] != '\0'; i++)
+		str2[i] = str[i];
+}
+
 void shutdown_system(boot_resources *resources){
 	resources->gRT->ResetSystem(EfiResetShutdown, EFI_SUCCESS, 0, NULL);
 }
@@ -82,4 +88,11 @@ void string_to_wstring(char *str, short unsigned int *wstr){
 	#else
 	#error "Big endian systems aren't yet supported!"
 	#endif
+}
+
+uint32_t create_colour(boot_resources *resources, uint32_t r, uint32_t g, uint32_t b){
+	if(resources->gop->Mode->Info->PixelFormat == PixelBlueGreenRedReserved8BitPerColor)
+		return COLOUR_BGR32(b, g, r);
+	
+	return COLOUR_RGB32(r, g, b);
 }

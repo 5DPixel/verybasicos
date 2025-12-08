@@ -23,5 +23,6 @@ typedef struct {
 
 void fail_if(int condition, CHAR16 *wstr, EFI_SYSTEM_TABLE *gST);
 void shutdown_system(boot_resources *resources);
+uint32_t create_colour(boot_resources *resources, uint32_t r, uint32_t g, uint32_t b);
 
 #endif

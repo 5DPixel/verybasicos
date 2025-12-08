@@ -1,2 +1,2 @@
 - Add script to fetch TianoCore OVMF firmware images instead of using provided
-- Go into framebuffer mode and use font
+- There is a sufficient environment, code a platform unspecific get key function (using a remapped PS/2 interrupt for BIOS) and start actually working on the bootloader

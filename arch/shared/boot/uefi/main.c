@@ -7,13 +7,14 @@
 #include <boot/menu.h>
 #include <boot/platform.h>
 #include <boot/uefi/framebuffer.h>
+#include <boot/psf.h>
+#include <psf.h>
 
 EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 	(void)ImageHandle; /* cast to a void, because I'm aware some compilers will warn as the ImageHandle is unused */
 
-	EFI_FILE_HANDLE root_volume;
-	EFI_FILE_HANDLE kernel_file;
 	boot_resources resources;
+	struct platform_model model;
 
 	resources.gST = SystemTable;
 	resources.gBS = SystemTable->BootServices;
@@ -21,12 +22,27 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
 	resources.image = ImageHandle;
 	resources.menu_entry_index = 0;
 
+	init_platform((void *)&resources, &model);
 	locate_gop(&resources);
 	set_gop_mode(&resources);
-	//enumerate_gop_modes(&resources);
-	return EFI_SUCCESS;
+	int i;
+	uint8_t *font = model.read_file(&model, "EFI\\BOOT\\spleen.psf");
+	//psf1_font_header header = {0};
+	struct text_attributes attr = {0};
+	attr.x = 100;
+	attr.y = 100;
+	attr.fg = PLATFORM_BLACK;
+	attr.bg = PLATFORM_WHITE;
+	//model.log(&model, "Hello, world", &attr, font);
+	//display_psf2_char(&model, font, 'A', &attr);
+	display_psf_string(&model, font, "Hello, world", attr);
 
-	init_menu(&resources);
+	//return EFI_SUCCESS;
+	//for(i = 0; i < 1000; i++)
+		//model.plot32(&model, i, i, create_colour(&resources, 255, 0, 0)); /* red */
+	for(;;)
+
+	//init_menu(&resources);
 
 	get_root_volume(&resources);
 	open_kernel_file(&resources, L"EFI\\BOOT\\kernel");
