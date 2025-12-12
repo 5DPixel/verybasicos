@@ -1,5 +1,5 @@
-#ifndef _BOOT_CONST_H
-#define _BOOT_CONST_H
+#ifndef UEFI_BOOT_CONST_H
+#define UEFI_BOOT_CONST_H
 
 #include <efi.h>
 

@@ -1,7 +1,6 @@
-#include <boot/psf.h>
+#include <boot/shared/psf.h>
 
 enum psf_font_type font_type(uint8_t *psf){
-	//TODO: fail if incorrect, potentially in serial console
 	if(*(uint16_t *)psf == PSF1_FONT_MAGIC) return FONT_PSF1;
 	if(*(uint32_t *)psf == PSF2_FONT_MAGIC) return FONT_PSF2;
 
@@ -25,11 +24,20 @@ void display_psf1_char(struct platform_model *model, uint8_t *psf, char ch, stru
 	}
 }
 
-void display_psf1_string(struct platform_model *model, uint8_t *psf, char *str, struct text_attributes attr){
+void display_psf1_string(struct platform_model *model, uint8_t *psf, char *str, struct text_attributes *attr){
 	int i;
 	for(i = 0; str[i] != '\0'; i++){
-		display_psf1_char(model, psf, str[i], &attr);
-		attr.x += 8;
+		if(str[i] == '\n'){
+			attr->y += 16;
+			attr->x -= 8 * i;
+			continue;
+		}
+		if(str[i] == '\r'){
+			attr->x -= 8 * i;
+			continue;
+		}
+		display_psf1_char(model, psf, str[i], attr);
+		attr->x += 8;
 	}
 }
 
@@ -61,18 +69,53 @@ void display_psf2_char(struct platform_model *model, uint8_t *psf, char ch, stru
 	}
 }
 
-void display_psf2_string(struct platform_model *model, uint8_t *psf, char *str, struct text_attributes attr){
+void display_psf2_string(struct platform_model *model, uint8_t *psf, char *str, struct text_attributes *attr){
 	struct psf2_font_header *header = (struct psf2_font_header *)psf;
 	int i;
 	for(i = 0; str[i] != '\0'; i++){
-		display_psf2_char(model, psf, str[i], &attr);
-		attr.x += header->width;
+		if(str[i] == '\n'){
+			attr->y += header->height;
+			attr->x -= header->width * i;
+			continue;
+		}
+		if(str[i] == '\r'){
+			attr->x -= header->width * i;
+			continue;
+		}
+		display_psf2_char(model, psf, str[i], attr);
+		attr->x += header->width;
 	}
 }
 
-void display_psf_string(struct platform_model *model, uint8_t *psf, char *str, struct text_attributes attr){
-	if(font_type(psf) == FONT_PSF1){
+void display_psf_string(struct platform_model *model, uint8_t *psf, char *str, struct text_attributes *attr){
+	enum psf_font_type type = font_type(psf);
+
+	if(type == FONT_PSF1){
 		display_psf1_string(model, psf, str, attr);
-	} else if(font_type(psf) == FONT_PSF2)
+	} else if(type == FONT_PSF2)
 		display_psf2_string(model, psf, str, attr);
+}
+
+int font_height(uint8_t *psf){
+	enum psf_font_type type = font_type(psf);
+
+	if(type == FONT_PSF2){
+		struct psf2_font_header *header = (struct psf2_font_header *)psf;
+		
+		return header->height;
+	}
+	
+	return 8;
+}
+
+int font_width(uint8_t *psf){
+	enum psf_font_type type = font_type(psf);
+
+	if(type == FONT_PSF2){
+		struct psf2_font_header *header = (struct psf2_font_header *)psf;
+		
+		return header->width;
+	}
+	
+	return 8;
 }

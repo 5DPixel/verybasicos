@@ -12,7 +12,7 @@ CPUS := 1
 
 KERNEL_TOOLCHAIN :=
 KERNEL_TOOLCHAIN_PREFIX :=
-FONT_NAME := spleen-16x32.bdf
+FONT_NAME := spleen-8x16.bdf
 FONT := $(addprefix $(CURDIR)/spleen/, $(FONT_NAME))
 FONT_OUT := $(addprefix $(CURDIR)/assets/fonts/, $(FONT_NAME:.bdf=.psf))
 

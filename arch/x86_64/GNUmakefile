@@ -2,6 +2,7 @@
 
 BUILD_DIR := $(CURDIR)/../../build
 OBJ_DIR := $(CURDIR)/../../obj
+INCLUDE_DIR := $(CURDIR)/../../include
 
 override OUTPUT_BINARY := $(BUILD_DIR)/kernel
 override LINKER_SCRIPT := $(CURDIR)/kernel.ld
@@ -97,7 +98,7 @@ $(OBJ_DIR)/%.c.o: %.c GNUmakefile
 
 $(OBJ_DIR)/%.asm.o: %.asm GNUmakefile
 	mkdir -p "$(dir $@)"
-	fasm $(FASMFLAGS) -c $< -o $@
+	fasm $(FASMFLAGS) $< $@
 
 .PHONY: clean
 clean:

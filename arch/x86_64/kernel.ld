@@ -1,6 +1,6 @@
 OUTPUT_FORMAT(elf64-x86-64)
 
-ENTRY(k_init)
+ENTRY(kernel_start)
 
 /* program header permissions to exert more control over linking process */
 PHDRS
@@ -12,7 +12,8 @@ PHDRS
 
 SECTIONS
 {
-	. = 0xffffffff80000000; /* higher half */
+	/*. = 0xffffffff80000000; /* TODO: uncomment and set up page tables for higher half */
+	. = 1M;
 	
 	.text : {
 		*(.text .text.*)

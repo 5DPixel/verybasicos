@@ -1,7 +1,7 @@
 #include <boot/uefi/framebuffer.h>
 #include <efi.h>
 
-void locate_gop(boot_resources *resources){
+void locate_gop(struct uefi_boot_resources *resources){
 	EFI_GUID gop_guid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
 	EFI_GRAPHICS_OUTPUT_PROTOCOL *gop;
 
@@ -11,7 +11,7 @@ void locate_gop(boot_resources *resources){
 	fail_if(status != 0, L"Unable to locate GOP!", resources->gST);
 }
 
-EFI_GRAPHICS_OUTPUT_MODE_INFORMATION **enumerate_gop_modes(boot_resources *resources){
+EFI_GRAPHICS_OUTPUT_MODE_INFORMATION **enumerate_gop_modes(struct uefi_boot_resources *resources){
 	EFI_GRAPHICS_OUTPUT_MODE_INFORMATION **info;
 	EFI_STATUS status;
 	UINTN size, modes;
@@ -30,7 +30,7 @@ EFI_GRAPHICS_OUTPUT_MODE_INFORMATION **enumerate_gop_modes(boot_resources *resou
 	return info;
 }
 
-UINT32 choose_gop_mode(boot_resources *resources){
+UINT32 choose_gop_mode(struct uefi_boot_resources *resources){
 	EFI_GRAPHICS_OUTPUT_MODE_INFORMATION **info = enumerate_gop_modes(resources);
 	UINTN modes;
 	int i;
@@ -75,6 +75,8 @@ UINT32 choose_gop_mode(boot_resources *resources){
 		}
 	}
 
+	resources->gBS->FreePool(info);
+
 	/* preferably choose RGB */
 	if(best_candidate_rgb != 0) return best_candidate_rgb;
 	if(best_candidate_bgr != 0) return best_candidate_bgr;
@@ -83,11 +85,11 @@ UINT32 choose_gop_mode(boot_resources *resources){
 	return 0;
 }
 
-void set_gop_mode(boot_resources *resources){
+void set_gop_mode(struct uefi_boot_resources *resources){
 	UINT32 graphics_mode = choose_gop_mode(resources);
 	EFI_STATUS status;
-	framebuffer *fb;
-	resources->gBS->AllocatePool(EfiLoaderCode, sizeof(framebuffer), (void **)&fb);
+	struct framebuffer *fb;
+	resources->gBS->AllocatePool(EfiLoaderCode, sizeof(struct framebuffer), (void **)&fb);
 
 	status = resources->gop->SetMode(resources->gop, graphics_mode);
 

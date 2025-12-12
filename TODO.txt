@@ -1,2 +1,7 @@
 - Add script to fetch TianoCore OVMF firmware images instead of using provided
-- There is a sufficient environment, code a platform unspecific get key function (using a remapped PS/2 interrupt for BIOS) and start actually working on the bootloader
+- Each arch uses config file instead of seperate GNUmakefile?
+- Load kernel!
+- Pass and retrieve memory map
+- Higher-half kernel with paging (exit boot services and construct page tables)
+- Load all segments and sections
+- Load kernel stub with physical address, by allocating pages at it

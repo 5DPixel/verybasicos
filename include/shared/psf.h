@@ -1,5 +1,5 @@
-#ifndef _SHARED_PSF_H
-#define _SHARED_PSF_H
+#ifndef SHARED_PSF_H
+#define SHARED_PSF_H
 
 #define PSF1_FONT_MAGIC 0x0436
 #define PSF2_FONT_MAGIC 0x864ab572
