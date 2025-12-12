@@ -42,7 +42,7 @@ The following will provide instructions and prerequisites to build the operating
 
 1. Clone this repo
    ```sh
-   git clone https://github.com/5DPixel/verybasicos.git
+   git clone https://github.com/5DPixel/verybasicos.git --recurse-submodules
    ```
 2. Build submodules
     ```sh
