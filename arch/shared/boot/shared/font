@@ -1,0 +1,39 @@
+elf.c:		void *mem = model->alloc(model, section->sh_size);
+elf.c:	model->alloc_pages(model, segment_page_count, phdr->p_paddr);
+log.c:	cb->buffer = model->alloc(model, capacity * sizeof(struct log_record));
+log.c:		model->free(model, (void *)cb->tail);
+log.c:	model->free(model, (void *)cb->buffer);
+log.c:	struct log_record *log = model->alloc(model, sizeof(struct log_record));
+log.c:	struct log_record *log = (struct log_record *)model->alloc(model, sizeof(struct log_record));
+log.c:	model->write(model, log->message, attr);
+menu.c:			model->write(model, entries[i].entry_name, &inverted);
+menu.c:		model->write(model, entries[i].entry_name, &attr->text_attr);
+main.c:	model->font_dimensions(model, &font_width, &font_height);
+main.c:		pressed_key = model->get_key(model);
+psf.c:				model->plot32(model, attr->x + j, attr->y + i, attr->fg);
+psf.c:				model->plot32(model, attr->x + j, attr->y + i, attr->bg);
+psf.c:				model->plot32(model, attr->x + j, attr->y + i, attr->fg);
+psf.c:				model->plot32(model, attr->x + j, attr->y + i, attr->bg);
+boot.c:	model->clear_screen(model, PLATFORM_BLACK);
+boot.c:	struct elf64_ehdr *hdr = (struct elf64_ehdr *)model->kernel;
+boot.c:	model->log(model, "Starting default boot...\n", LOG_SEVERITY_NONE);
+boot.c:	if(is_valid_elf(model->kernel) == -1){
+boot.c:		model->log(model, "Kernel isn't a valid ELF file!\n", LOG_SEVERITY_ERROR);
+boot.c:	if(check_elf_supported(model->kernel) == -1){
+boot.c:		model->log(model, "Kernel system architecture doesn't match this machine!\n", LOG_SEVERITY_ERROR);
+boot.c:		model->log(model, "Couldn't allocate memory for section!\n", LOG_SEVERITY_ERROR);
+boot.c:	model->log(model, "Allocated memory for empty section(s)\n", LOG_SEVERITY_NONE);
+boot.c:	model->log(model, "Retrieved system memory map\n", LOG_SEVERITY_NONE);
+boot.c:	struct kernel_boot_params *params = model->alloc(model, sizeof(struct kernel_boot_params));
+boot.c:	params->fb = model->display_attributes(model);
+boot.c:	params->font = model->font;
+boot.c:	struct mmap_entries *entries_conventional = model->alloc_conventional(model, MAX_MMAP_ENTRY_COUNT * sizeof(struct mmap_entry));	
+boot.c:	model->mmap_entries = entries_conventional;
+boot.c:	uint8_t *font_copy = model->alloc_conventional(model, font_length);
+boot.c:	model->free(model->font);
+boot.c:	model->free(entries);
+boot.c:	model->log(model, "Loading kernel...\n", LOG_SEVERITY_NONE);
+boot.c:	log_cb_free(model, model->internal_log_buffer);
+boot.c:	model->clear_screen(model, PLATFORM_BLACK);
+boot.c:	/* TODO: debug why freeing model->kernel results in framebuffer text not rendering*/
+boot.c:	model->exit(model);

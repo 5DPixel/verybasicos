@@ -1,7 +1,7 @@
 #ifndef SHARED_KERNEL_H
 #define SHARED_KERNEL_H
 
-#define MAX_MMAP_ENTRY_COUNT 128
+#define MAX_MMAP_ENTRY_COUNT 256
 
 enum mem_type {
 	MEM_FREE = 0,
@@ -24,7 +24,7 @@ struct kernel_boot_params {
 	uint8_t *font;
 	struct framebuffer *fb;
 	uint32_t mem_region_count;
-	struct mmap_entry mem_regions[MAX_MMAP_ENTRY_COUNT];
+	struct mmap_entry *mem_regions;
 };
 
 void kernel_init(struct kernel_boot_params *params);

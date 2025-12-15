@@ -14,6 +14,14 @@ void *platform_alloc(struct platform_model *model, size_t size){
 	return buffer;
 }
 
+void *platform_alloc_conventional(struct platform_model *model, size_t size){
+	void *buffer;
+	struct uefi_boot_resources *resources = model->ctx;
+	resources->gBS->AllocatePool(EfiLoaderCode, (UINTN)size, (void **)&buffer);
+
+	return buffer;
+}
+
 void platform_alloc_pages(struct platform_model *model, int page_count, uint64_t addr){	
 	EFI_PHYSICAL_ADDRESS *paddr = (EFI_PHYSICAL_ADDRESS *)&addr;
 	struct uefi_boot_resources *resources = model->ctx;
@@ -29,7 +37,7 @@ void platform_write(struct platform_model *model, const char *message, struct te
 	display_psf_string(model, model->font, (char *)message, attr);
 }
 
-uint8_t *platform_read_file(struct platform_model *model, const char *file_name){
+uint8_t *platform_read_file(struct platform_model *model, const char *file_name, uint32_t *size){
 	struct uefi_boot_resources *resources = model->ctx;
 	uint8_t *file_buffer;
 	int file_name_len = string_len((char *)file_name);
@@ -54,17 +62,19 @@ uint8_t *platform_read_file(struct platform_model *model, const char *file_name)
 
     fail_if(status != 0, L"Failed to open file!\r\n", resources->gST);
 
-    UINTN size = sizeof(EFI_FILE_INFO) + 100; /* TODO: dynamically resize buffer if fail */
+    UINTN info_size = sizeof(EFI_FILE_INFO) + 100; /* TODO: dynamically resize buffer if fail */
     EFI_FILE_INFO *file_info;
-    resources->gBS->AllocatePool(EfiLoaderCode, size, (void **)&file_info);
+    resources->gBS->AllocatePool(EfiLoaderCode, info_size, (void **)&file_info);
     UINTN file_size;
     EFI_GUID guid = EFI_FILE_INFO_ID;
 
-    file->GetInfo(file, &guid, &size, (void *)file_info);
+    file->GetInfo(file, &guid, &info_size, (void *)file_info);
     file_size = file_info->FileSize;
 
 	file_buffer = (uint8_t *)platform_alloc(model, file_size);
     file->Read(file, &file_size, file_buffer);
+	
+	*size = file_size;
 	
 	file->Close(file);
 
@@ -131,6 +141,14 @@ struct mmap_entry *platform_get_mmap_entries(struct platform_model *model, int *
 
 void platform_exit(struct platform_model *model){
 	struct uefi_boot_resources *resources = model->ctx;
+
+	EFI_MEMORY_DESCRIPTOR *mmap = NULL;
+	UINTN mmap_size; 
+	UINTN map_key;
+	UINTN descriptor_size;
+	UINT32 descriptor_version;
+
+	resources->gBS->GetMemoryMap(&mmap_size, mmap, &map_key, &descriptor_size, &descriptor_version);
 	
 	resources->gBS->ExitBootServices(resources->image, resources->mmap_key);
 	/* platform can no longer be used */
@@ -165,6 +183,7 @@ void plot_pixel_32bpp(struct platform_model *model, int x, int y, uint32_t colou
 
 void init_platform(void *ctx, const char *font_file_path, const char *kernel_file_path, struct platform_model *model){
 	model->alloc = platform_alloc;
+	model->alloc_conventional = platform_alloc_conventional;
 	model->alloc_pages = platform_alloc_pages;
 	model->free = platform_free;
 	model->write = platform_write;
@@ -180,8 +199,8 @@ void init_platform(void *ctx, const char *font_file_path, const char *kernel_fil
 	model->font_dimensions = font_dimensions;
 	model->clear_screen = clear_screen;
 	model->internal_log_buffer = (struct log_circular_buffer *)model->alloc(model, sizeof(struct log_circular_buffer));
-	model->font = model->read_file(model, font_file_path);
-	model->kernel = model->read_file(model, kernel_file_path);
+	model->font = model->read_file(model, font_file_path, &model->font_length);
+	model->kernel = model->read_file(model, kernel_file_path, &model->kernel_length);
 
     struct framebuffer *fb = model->display_attributes(model);
     

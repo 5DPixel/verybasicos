@@ -4,13 +4,6 @@
 #include <boot/shared/platform.h>
 #include <psf.h>
 
-struct text_attributes {
-	int x;
-	int y;
-	int bg;
-	int fg;
-};
-
 void display_psf1_char(struct platform_model *model, uint8_t *psf, char ch, struct text_attributes *attr);
 void display_psf1_char(struct platform_model *model, uint8_t *psf, char ch, struct text_attributes *attr);
 void display_psf2_char(struct platform_model *model, uint8_t *psf, char ch, struct text_attributes *attr);

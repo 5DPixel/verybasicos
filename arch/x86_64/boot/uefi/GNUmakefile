@@ -75,7 +75,6 @@ override LDFLAGS += \
 	-lgnuefi \
 	-lefi
 
-#override SRC := $(shell find -type f 2>/dev/null | LC_ALL=C sort)
 override SRC := $(shell find $(CURDIR)/../../../shared/boot/uefi $(CURDIR)/../../../shared/boot/shared -type f 2>/dev/null | LC_ALL=C sort)
 override C_SRC := $(filter %.c, $(SRC))
 override OBJ := $(addprefix $(OBJ_DIR)/, $(C_SRC:.c=.c.o)) # remember to use the slash, otherwise the path gets formatted as ../../obj/boot./[file]

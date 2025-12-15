@@ -35,6 +35,7 @@ The following will provide instructions and prerequisites to build the operating
 * `make`
 * A MinGW GCC cross-compiler
 * A GCC cross-compiler for your desired architecture (only x86-64 is currently supported)
+* `ld`
 * `qemu-system-[your arch]` for emulation
 * `bdf2psf` for building font assets
 

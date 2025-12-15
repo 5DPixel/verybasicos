@@ -5,3 +5,5 @@
 - Higher-half kernel with paging (exit boot services and construct page tables)
 - Load all segments and sections
 - Load kernel stub with physical address, by allocating pages at it
+- Fix obscure GCC optimisation bug
+- Allocate font

@@ -22,6 +22,7 @@ enum log_severity;
 
 struct platform_model {
 	void *(*alloc)(struct platform_model *model, size_t size);
+	void *(*alloc_conventional)(struct platform_model *model, size_t size);
 	void (*alloc_pages)(struct platform_model *model, int page_count, uint64_t addr);
 	void (*exit)(struct platform_model *model);
 	void (*free)(struct platform_model *model, void *ptr);
@@ -29,7 +30,7 @@ struct platform_model {
 	void (*log)(struct platform_model *model, char *message, enum log_severity severity);
 	void (*font_dimensions)(struct platform_model *model, int *width, int *height);
 	struct mmap_entry *(*mmap_entries)(struct platform_model *model, int *mmap_entry_count);
-	uint8_t *(*read_file)(struct platform_model *model, const char *file_name);
+	uint8_t *(*read_file)(struct platform_model *model, const char *file_name, uint32_t *size);
 	void (*plot32)(struct platform_model *model, int x, int y, uint32_t colour);
 	struct framebuffer *(*display_attributes)(struct platform_model *model);
 	enum key (*get_key)(struct platform_model *model); /* polling */
@@ -40,6 +41,8 @@ struct platform_model {
 	struct text_attributes *text_attr;
 	uint8_t *font;
 	uint8_t *kernel;
+	uint32_t font_length;
+	uint32_t kernel_length;
 };
 
 enum key {
@@ -60,7 +63,7 @@ void platform_write(struct platform_model *model, const char *message, struct te
 void platform_exit(struct platform_model *model);
 struct framebuffer *platform_display_attributes(struct platform_model *model);
 struct mmap_entry *platform_get_mmap_entries(struct platform_model *model, int *mmap_entry_count);
-uint8_t *platform_read_file(struct platform_model *model, const char *file_name);
+uint8_t *platform_read_file(struct platform_model *model, const char *file_name, uint32_t *size);
 void set_text_attr(struct platform_model *model, uint32_t text_attr);
 void plot_pixel_32bpp(struct platform_model *model, int x, int y, uint32_t colour);
 void init_platform(void *ctx, const char *font_file_path, const char *kernel_file_path, struct platform_model *model);

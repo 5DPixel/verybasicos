@@ -42,8 +42,6 @@ int elf64_alloc_sections(struct platform_model *model, struct elf64_ehdr *hdr){
 }
 
 void *load_segment(struct platform_model *model, struct elf64_ehdr *hdr, struct elf64_phdr *phdr){
-	if(phdr->p_type != PT_LOAD) return NULL;
-
 	int segment_page_count = CEIL_DIV(phdr->p_memsz, PAGE_SIZE);
 	model->alloc_pages(model, segment_page_count, phdr->p_paddr);
 	uint8_t *pages = (uint8_t *)phdr->p_paddr;

@@ -42,14 +42,15 @@ ifeq ($(CC_IS_CLANG),1)
 endif
 
 override CFLAGS += \
-    -Wall \
+	-Wall \
     -Wextra \
-    -std=gnu11 \
+    -std=c11 \
     -ffreestanding \
     -fno-stack-protector \
     -fno-stack-check \
     -fno-lto \
     -fno-PIC \
+	-fno-strict-aliasing \
     -ffunction-sections \
     -fdata-sections \
     -m64 \
@@ -60,7 +61,7 @@ override CFLAGS += \
     -mno-sse \
     -mno-sse2 \
     -mno-red-zone \
-    -mcmodel=kernel
+	-maccumulate-outgoing-args
 
 override CPPFLAGS := \
     -I$(INCLUDE_DIR)/x86_64 \
@@ -78,6 +79,7 @@ override LDFLAGS += \
     -T $(LINKER_SCRIPT)
 
 override SRC := $(shell find -type f 2>/dev/null -not -path "./boot/*" | LC_ALL=C sort)
+override SRC += $(shell find $(CURDIR)/../shared -type f 2>/dev/null -not -path "$(CURDIR)/../shared/boot/*" | LC_ALL=C sort)
 override C_SRC := $(filter %.c, $(SRC))
 override ASM_SRC := $(filter %.asm, $(SRC))
 override OBJ := $(addprefix $(OBJ_DIR)/, $(C_SRC:.c=.c.o) $(ASM_SRC:.asm=.asm.o)) # remember to use the slash, otherwise the path gets formatted as ../../obj/boot./[file]
