@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 #define XOR_SWAP(a, b) do { \
 	a ^= b; \
@@ -42,5 +43,11 @@ void *memcpy(void *restrict dest, const void *restrict src, size_t n);
 void *memset(void *s, int c, size_t n);
 
 int string_equals(char *a, char *b);
+bool power_of_two(size_t num);
+
+inline size_t align_size_forward(size_t size, size_t align){
+    return CEIL_DIV(size, align) * align;
+}
+
 
 #endif
