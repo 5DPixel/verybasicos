@@ -50,5 +50,7 @@ void *rb_tree_alloc_pages(struct rb_tree_allocator *alloc, int pages, uintptr_t 
 	if(page_start)
 		addr = page_start * alloc->page_size;
 	
+	alloc->current_page++;
+	
 	return (void *)addr;
 }

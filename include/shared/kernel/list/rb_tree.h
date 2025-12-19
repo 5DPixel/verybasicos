@@ -6,12 +6,6 @@
 /* rb tree header definitions */
 /* rb trees guarantee a worst case of space-time complexity O(log(n)) for searching, O(1) for rotating (as it's just re-ordering pointers), and a space complexity of O(n), but more realistically that would be the size of the struct accounting for alignment */
 
-#define rb_tree_node_sibling(node, dir) \
-	node->parent->children[1 - dir]
-
-#define rb_tree_node_child_sibling(node, dir) \
-	node->children[1 - dir]
-
 #include <stdint.h>
 
 enum rb_tree_node_colour {
@@ -48,6 +42,7 @@ static inline enum rb_tree_node_direction rb_tree_node_direction(struct rb_tree_
 
 struct rb_tree_node *rb_tree_rotate_subtree(struct rb_tree *tree, struct rb_tree_node *sub, enum rb_tree_node_direction direction);
 void rb_tree_insert(struct rb_tree *tree, struct rb_tree_node *node, struct rb_tree_node *parent);
+void rb_tree_delete(struct rb_tree *tree, struct rb_tree_node *node);
 struct rb_tree_node *rb_tree_search(struct rb_tree_node *node, uintptr_t key);
 
 #endif

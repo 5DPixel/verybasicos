@@ -3,3 +3,4 @@
 - Higher-half kernel with paging (exit boot services and construct page tables)
 - Paging!
 - RB tree allocator free memory
+- RB tree delete

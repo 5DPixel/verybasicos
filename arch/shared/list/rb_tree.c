@@ -1,8 +1,9 @@
 #include <kernel/list/rb_tree.h>
+#include <stddef.h>
 
 struct rb_tree_node *rb_tree_rotate_subtree(struct rb_tree *tree, struct rb_tree_node *sub, enum rb_tree_node_direction direction){
     struct rb_tree_node *sub_parent = sub->parent;
-    struct rb_tree_node *root = rb_tree_node_child_sibling(sub_parent, direction); /* sibling of subtree */
+    struct rb_tree_node *root =  sub_parent->children[1 - direction]; /* sibling of subtree */
     struct rb_tree_node *child = root->children[direction];
 
     if(child)
@@ -39,7 +40,8 @@ void rb_tree_insert(struct rb_tree *tree, struct rb_tree_node *node, struct rb_t
 
         grandparent = node->parent->parent;
         direction = rb_tree_node_direction(parent);
-        uncle = rb_tree_node_child_sibling(grandparent, direction);
+		uncle = grandparent->children[1 - direction];
+
 
         if(!uncle || uncle->colour == RB_TREE_NODE_BLACK){
             if(node == parent->children[1 - direction]){
@@ -61,6 +63,19 @@ void rb_tree_insert(struct rb_tree *tree, struct rb_tree_node *node, struct rb_t
     }
 
     return;
+}
+
+void rb_tree_delete(struct rb_tree *tree, struct rb_tree_node *node){
+	struct rb_tree_node *parent = node->parent;
+	enum rb_tree_node_direction direction = rb_tree_node_direction(node);
+	parent->children[direction] = NULL;
+	node = node->left; /* left, just so the while loop makes node->left equal to node */
+	
+	while((node = node->parent)){
+		direction = rb_tree_node_direction(node);
+		if(!parent)
+			return;
+	}
 }
 
 struct rb_tree_node *rb_tree_search(struct rb_tree_node *node, uintptr_t key){
