@@ -8,49 +8,59 @@ void rb_tree_alloc_init(struct rb_tree_allocator *alloc, enum rb_tree_allocator_
 
 	int page_size = 0x1000; /* 4096 as a fallback */
 
-	if(flags & PAGE_SIZE_4K)
+	if(flags & RB_TREE_ALLOC_PAGE_SIZE_4K)
 		page_size = 0x1000;
+	
+	alloc->data = data;
 	
 	struct rb_tree *tree = (struct rb_tree *)data;
 	memset(tree, 0, sizeof(struct rb_tree));
 
-	data += sizeof(struct rb_tree);
-
-	struct rb_tree_node *root = (struct rb_tree_node *)data;
+	struct rb_tree_node *root = (struct rb_tree_node *)((char *)data + sizeof(struct rb_tree));
 	memset(root, 0, sizeof(struct rb_tree_node));
 
-	data += sizeof(struct rb_tree_node);
-
-	struct rb_tree_node *root_node = (struct rb_tree_node *)data;
-	memset(root_node, 0, sizeof(struct rb_tree_node));
-
 	root->key = ((uintptr_t)1 << 32) | CEIL_DIV((uintptr_t)data, page_size); /* page start */
-	root->parent = NULL;
+	root->colour = RB_TREE_NODE_BLACK;
 	
-	root_node->colour = RB_TREE_NODE_BLACK;
+	tree->root = root;
 	
 	alloc->tree = tree;
-	alloc->data = data;
 	alloc->page_size = page_size;
+	alloc->current_parent = root;
 }
 
 void *rb_tree_alloc_pages(struct rb_tree_allocator *alloc, int pages, uintptr_t page_start){
 	uintptr_t addr;
-	addr = alloc->current_page * alloc->page_size;
 	
-	struct rb_tree_node *parent = (struct rb_tree_node *)alloc->data;
+	struct rb_tree_node *parent = alloc->current_parent;
+	struct rb_tree_node *child = (struct rb_tree_node *)((char *)parent + sizeof(struct rb_tree_node));
+	memset(child, 0, sizeof(struct rb_tree_node));
 	
-	alloc->data += sizeof(struct rb_tree_node);
+	uintptr_t node_page_count = parent->key & 0xFFFFFFFF;
+	uintptr_t node_page_start = parent->key >> 32; /* TODO: change 1 to previous page count */
 
-	struct rb_tree_node *child = (struct rb_tree_node *)alloc->data;
+	child->key = ((uintptr_t)pages << 32) | (node_page_start + node_page_count); /* page start */
+	rb_tree_insert(alloc->tree, child, parent);
+	
+	addr = (node_page_start + node_page_count) * alloc->page_size;
 
-	child->key = ((uintptr_t)pages << 32) | CEIL_DIV((uintptr_t)alloc->data, alloc->page_size); /* page start */
-	child->parent = parent;
-
-	if(page_start)
+	if(page_start != 0){
 		addr = page_start * alloc->page_size;
+		child->key = ((uintptr_t)pages << 32) | page_start;
+	}
 	
-	alloc->current_page++;
+	alloc->current_parent = child;
 	
 	return (void *)addr;
+}
+
+void rb_tree_free_pages(struct rb_tree_allocator *alloc, int page_count, void *addr){
+	uintptr_t key = ((uintptr_t)page_count << 32) | ((uintptr_t)addr / alloc->page_size);
+	struct rb_tree_node *page_node = rb_tree_search(alloc->tree->root, key);
+	
+	if(page_node){
+		rb_tree_delete(alloc->tree, page_node); 
+	}
+	
+	alloc->current_parent = page_node;
 }

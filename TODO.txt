@@ -3,4 +3,7 @@
 - Higher-half kernel with paging (exit boot services and construct page tables)
 - Paging!
 - RB tree allocator free memory
-- RB tree delete
+- Fully understand RB tree code
+- Find closest RB tree key
+- Debug memory address being at 0
+- weird things :3

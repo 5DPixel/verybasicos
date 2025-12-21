@@ -2,15 +2,14 @@
 #define KERNEL_SHARED_LIST_RB_TREE_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 /* rb tree header definitions */
 /* rb trees guarantee a worst case of space-time complexity O(log(n)) for searching, O(1) for rotating (as it's just re-ordering pointers), and a space complexity of O(n), but more realistically that would be the size of the struct accounting for alignment */
 
-#include <stdint.h>
-
 enum rb_tree_node_colour {
-	RB_TREE_NODE_BLACK,
-	RB_TREE_NODE_RED
+	RB_TREE_NODE_BLACK = 0,
+	RB_TREE_NODE_RED = 1
 };
 
 enum rb_tree_node_direction {
@@ -44,5 +43,7 @@ struct rb_tree_node *rb_tree_rotate_subtree(struct rb_tree *tree, struct rb_tree
 void rb_tree_insert(struct rb_tree *tree, struct rb_tree_node *node, struct rb_tree_node *parent);
 void rb_tree_delete(struct rb_tree *tree, struct rb_tree_node *node);
 struct rb_tree_node *rb_tree_search(struct rb_tree_node *node, uintptr_t key);
+struct rb_tree_node *rb_tree_next_free(struct rb_tree_node *node);
+uintptr_t rb_tree_closest_key(struct rb_tree_node *node);
 
 #endif
