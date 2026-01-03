@@ -34,3 +34,35 @@ bool power_of_two(size_t num){
 	
 	return true;
 }
+
+int string_len(char *str){
+    int i;
+    for(i = 0; str[i] != '\0'; i++);
+
+    return i;
+}
+
+int string_equals(char *a, char *b){
+    int len = string_len(a) > string_len(b) ? string_len(a) : string_len(b);
+    int i;
+
+    for(i = 0; i < len; i++) if(a[i] != b[i]) return -1;
+
+    return 0;
+}
+
+size_t align_size_forward(size_t size, size_t align){
+    return CEIL_DIV(size, align) * align;
+}
+
+uint32_t align_size_power_of_two(uint32_t size){
+	size--;
+	size |= size >> 1;
+	size |= size >> 2;
+	size |= size >> 4;
+	size |= size >> 8;
+	size |= size >> 16;
+	size++;
+	
+	return size;
+}

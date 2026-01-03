@@ -33,6 +33,17 @@ CFLAGS := -g -O2 -pipe
 CPPFLAGS :=
 LDFLAGS :=
 
+LOG_QUIET := 1
+
+# arg 1: command, arg 2: source, arg 3: out
+define log_step
+    $(if $(filter $(LOG_QUIET), 1),
+		@$(1) 2>/dev/null 1>/dev/null;
+		@echo "$(firstword $(subst :, , $(1)))       $(shell basename -a $(2))       $(shell basename -a $(3))",
+		$(1)
+    )
+endef
+
 override CC_IS_CLANG := $(shell ! $(CC) --version 2>/dev/null | grep -q '^Target: '; echo $$?)
 
 ifeq ($(CC_IS_CLANG),1)
@@ -86,12 +97,20 @@ all: $(OUTPUT_BINARY)
 -include $(HEADER_DEPS)
 
 $(OUTPUT_BINARY): GNUmakefile $(OBJ)
-	mkdir -p "$(dir $@)"
-	$(LD) $(LDFLAGS) $(OBJ) -o $@
+	@mkdir -p "$(dir $@)"
+	$(call log_step, \
+		$(LD) $(LDFLAGS) $(OBJ) -o $@, \
+		$(OBJ), \
+		$@ \
+	)
 
 $(OBJ_DIR)/%.c.o: %.c GNUmakefile
-	mkdir -p "$(dir $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+	@mkdir -p "$(dir $@)"
+	$(call log_step, \
+		$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@, \
+		$<, \
+		$@ \
+	)
 
 .PHONY: clean
 clean:

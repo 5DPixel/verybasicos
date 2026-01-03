@@ -33,6 +33,20 @@ CFLAGS := -g -O2 -pipe
 CPPFLAGS :=
 LDFLAGS :=
 FASMFLAGS :=
+RUSTFLAGS := --crate-type=staticlib -O
+
+LOG_QUIET := 1
+
+# arg 1: command, arg 2: source, arg 3: out
+define log_step
+	$(if $(filter $(LOG_QUIET), 1),
+		@$(1) 2>/dev/null 1>/dev/null
+		@echo "$(firstword $(subst :, , $(1)))        $(shell basename -a $(2))        $(shell basename -a $(3))",
+		$(1)
+	)
+endef
+
+override RUSTC := rustc --target x86_64-unknown-none
 
 override CC_IS_CLANG := $(shell ! $(CC) --version 2>/dev/null | grep -q '^Target: '; echo $$?)
 
@@ -60,8 +74,7 @@ override CFLAGS += \
     -mno-mmx \
     -mno-sse \
     -mno-sse2 \
-    -mno-red-zone \
-	-maccumulate-outgoing-args
+    -mno-red-zone
 
 override CPPFLAGS := \
     -I$(INCLUDE_DIR)/x86_64 \
@@ -91,17 +104,36 @@ all: $(OUTPUT_BINARY)
 -include $(HEADER_DEPS)
 
 $(OUTPUT_BINARY): GNUmakefile $(LINKER_SCRIPT) $(OBJ)
-	mkdir -p "$(dir $@)"
-	$(LD) $(LDFLAGS) $(OBJ) -o $@
+	@mkdir -p "$(dir $@)"
+	$(call log_step, \
+		$(RUSTC) $(RUSTFLAGS) $(CURDIR)/../shared/rust/lib.rs -o $(OBJ_DIR)/libkernel_rs.a, \
+		$(CURDIR)/../shared/rust/lib.rs, \
+		$(OBJ_DIR)/libkernel_rs.a \
+	)
+	
+	$(call log_step, \
+		$(LD) $(LDFLAGS) $(OBJ) $(OBJ_DIR)/libkernel_rs.a -o $@, \
+		$(OBJ) $(OBJ_DIR)/libkernel_rs.a, \
+		$@ \
+	)
 
 $(OBJ_DIR)/%.c.o: %.c GNUmakefile
-	mkdir -p "$(dir $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+	@mkdir -p "$(dir $@)"
+	$(call log_step, \
+		 $(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@, \
+		 $<, \
+		 $@ \
+	)
 
 $(OBJ_DIR)/%.asm.o: %.asm GNUmakefile
-	mkdir -p "$(dir $@)"
-	fasm $(FASMFLAGS) $< $@
+	@mkdir -p "$(dir $@)"
+	$(call log_step, \
+		fasm $(FASMFLAGS) $< $@, \
+		$<, \
+		$@ \
+	)
 
 .PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR) $(OBJ_DIR)
+	rm $(OBJ_DIR)/libkernel_rs.a

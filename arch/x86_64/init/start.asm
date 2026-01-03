@@ -27,11 +27,6 @@ kernel_code_segment_flags equ 0xA0
 kernel_data_segment_access_byte equ 0x97
 kernel_data_segment_flags equ 0xA0 ; 0xA << 4
 
-section '.bss'
-stack_begin:
-	rb 16384
-stack_end:
-
 section '.rodata'
 
 gdt:
@@ -53,6 +48,11 @@ gdt:
 	.end:
 
 gdt_desc: dw gdt.end - gdt - 1
+
+section '.bss'
+stack_begin:
+	rb 16384
+stack_end:
 
 section '.text'
 

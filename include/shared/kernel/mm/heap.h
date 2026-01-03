@@ -4,11 +4,11 @@
 #include <kernel/mm/rb_tree_alloc.h>
 #include <stddef.h>
 
-#define INITIAL_HEAP_DATA_SIZE 8192
+extern uintptr_t _kernel_heap_start;
 
 enum kernel_allocator_flags {
-	KERNEL_PAGE_SIZE_4K = 0x00,
-	KERNEL_PAGE_SIZE_2M = 0x01
+	KERNEL_PAGE_SIZE_4K = 0x01,
+	KERNEL_PAGE_SIZE_2M = 0x02
 };
 
 void *kernel_heap_alloc_pages(int pages);

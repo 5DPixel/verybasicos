@@ -34,7 +34,6 @@ void start_default_boot(struct platform_model *model){
 	params->fb = model->alloc_conventional(model, sizeof(struct framebuffer));
 	params->font = model->alloc_conventional(model, model->font_length);
 
-	model->log(model, "Past statement...\n", LOG_SEVERITY_NONE);
 	memcpy(params->fb, model->display_attributes(model), sizeof(struct framebuffer));
 	memcpy(params->font, model->font, model->font_length);
 
@@ -55,6 +54,6 @@ void start_default_boot(struct platform_model *model){
 	model->exit(model);
 	
 	/* to the kernel! */
-	void (*kernel_init)(struct kernel_boot_params *params) = (void *)entry;
-	kernel_init(params);
+	void (*kernel_start)(struct kernel_boot_params *params) __attribute__((sysv_abi)) = (void *)entry;
+	kernel_start(params);
 }

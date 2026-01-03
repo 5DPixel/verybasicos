@@ -27,18 +27,21 @@ SECTIONS
 
 	.note.gnu.build-id : {
 		*(.note.gnu.build-id)
-	} :rodata
+	} : note.gnu-build-id
 
 	. = ALIGN(CONSTANT(MAXPAGESIZE));
 
 	.data : {
 		*(.data .data.*)
-	} :data
+	} : data
 
 	.bss : {
 		*(.bss .bss.*)
 		*(COMMON)
 	}
+
+	. = ALIGN(CONSTANT(MAXPAGESIZE));
+	_kernel_heap_start = .;
 
 	/DISCARD/ : {
 		*(.eh_frame*)

@@ -18,14 +18,15 @@ struct mmap_entry {
 	uint64_t virt_base;
 	uint64_t size;
 	enum mem_type type;
-};
+} __attribute__((packed));
 
 struct kernel_boot_params {
 	uint8_t *font;
 	struct framebuffer *fb;
 	uint32_t mem_region_count;
 	struct mmap_entry *mem_regions;
-};
+	uintptr_t acpi_start;
+} __attribute__((packed));
 
 void kernel_init(struct kernel_boot_params *params);
 

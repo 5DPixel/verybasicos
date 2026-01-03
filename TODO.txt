@@ -2,6 +2,5 @@
 - Each arch uses config file instead of seperate GNUmakefile?
 - Higher-half kernel with paging (exit boot services and construct page tables)
 - Paging!
-- Buddy allocation (a note here about it... again!)
-- Use RBTs to manage buddy allocation, because I already use them for page allocation, why not re-use them?
-- So, allocate n pages to then initialise the higher-level arbitrarily sized heap allocator, so you can allocate j bytes where j isn't necessarily a whole number integer of pages
+- I/O operations on files in VFSs
+- Hashing
