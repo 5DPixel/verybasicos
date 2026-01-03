@@ -1,0 +1,11 @@
+{
+	"cc": {
+		"check_version": "--version"
+	},
+	
+	"bdf2psf": {},
+		
+	"make": {
+		"check_version": "--version"
+	}
+}

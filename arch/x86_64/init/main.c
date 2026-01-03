@@ -36,6 +36,6 @@ void kernel_init(struct kernel_boot_params *params){
 	//ramfs_write_file((char *)file_name, (void *)test, string_len((char *)test));
 	//ramfs_read_file((char *)file_name, (void *)read, string_len((char *)test));
 	
-	display_psf_string(params->fb, params->font, "Hello", &attr);
+	display_psf_string(params->fb, params->font, "Hello, world!", &attr);
 	for(;;); 
 }

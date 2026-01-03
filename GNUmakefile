@@ -8,6 +8,8 @@ override OUTPUT_KERNEL = $(CURDIR)/build/kernel
 BOOT_TOOLCHAIN :=
 BOOT_TOOLCHAIN_PREFIX := x86_64-w64-mingw32-
 
+SKIP_TOOL_CHECK := 0
+
 CPUS := 1
 
 KERNEL_TOOLCHAIN :=
@@ -16,9 +18,9 @@ FONT_NAME := spleen-8x16.bdf
 FONT := $(addprefix $(CURDIR)/spleen/, $(FONT_NAME))
 FONT_OUT := $(addprefix $(CURDIR)/assets/fonts/, $(FONT_NAME:.bdf=.psf))
 
-IS_EFI := $(shell [ -d /sys/firmware/efi ])
-
-ARCH := $(shell uname -m)
+ifeq ($(ARCH_EXISTS), 0)
+	$(error "Arch $(ARCH) doesn't exist, specify another!")
+endif
 
 LOG_QUIET := 1
 
@@ -59,6 +61,8 @@ endef
 all: $(OUTPUT_ISO)
 
 $(OUTPUT_ISO): GNUmakefile submodules
+	@$(if $(filter $(SKIP_TOOL_CHECK),0), $(CURDIR)/scripts/check_tools.py --exit,)
+	@$(CURDIR)/scripts/check_tools.py --check-arch $(CURDIR)/arch $(ARCH)
 	$(call add_flag_if_quiet, \
 		$(MAKE) -C $(CURDIR)/arch/$(ARCH)/boot/uefi \
 			-j$(CPUS) TOOLCHAIN_PREFIX=$(BOOT_TOOLCHAIN_PREFIX) \
@@ -110,6 +114,16 @@ clean:
 	rm -rf $(CURDIR)/obj
 	rm -rf $(CURDIR)/assets/fonts
 
+.PHONY: distclean
+distclean:
+	rm -f $(OUTPUT_ESP)
+	rm -f $(OUTPUT_BOOTLOADER)
+	rm -f $(OUTPUT_ISO)
+	rm -rf $(CURDIR)/build
+	rm -rf $(CURDIR)/obj
+	rm -rf $(CURDIR)/assets/fonts
+	git submodule foreach --recursive make clean || true
+
 .PHONY: submodules
 submodules:
 	$(call add_flag_if_quiet, $(MAKE) -C gnu-efi -j$(CPUS), --no-print-directory -s)
@@ -129,3 +143,7 @@ submodules:
 		 256 \
 		 $(FONT_OUT)
 
+.PHONY: defconfig
+defconfig:
+	@$(CURDIR)/scripts/default_config.py
+	@echo "generated default config..."

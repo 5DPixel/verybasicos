@@ -35,7 +35,7 @@ LDFLAGS :=
 FASMFLAGS :=
 RUSTFLAGS := --crate-type=staticlib -O
 
-LOG_QUIET := 1
+LOG_QUIET := 0
 
 # arg 1: command, arg 2: source, arg 3: out
 define log_step
@@ -52,7 +52,7 @@ override CC_IS_CLANG := $(shell ! $(CC) --version 2>/dev/null | grep -q '^Target
 
 ifeq ($(CC_IS_CLANG),1)
     override CC += \
-        -target x86_64-unknown-none
+        -target $(ARCH)-unknown-none
 endif
 
 override CFLAGS += \
@@ -91,8 +91,8 @@ override LDFLAGS += \
     --gc-sections \
     -T $(LINKER_SCRIPT)
 
-override SRC := $(shell find -type f 2>/dev/null -not -path "./boot/*" | LC_ALL=C sort)
-override SRC += $(shell find $(CURDIR)/../shared -type f 2>/dev/null -not -path "$(CURDIR)/../shared/boot/*" | LC_ALL=C sort)
+override SRC := $(realpath $(shell find -type f 2>/dev/null -not -path "./boot/*" | LC_ALL=C sort))
+override SRC += $(realpath $(shell find $(CURDIR)/../shared -type f 2>/dev/null -not -path "$(CURDIR)/../shared/boot/*" | LC_ALL=C sort))
 override C_SRC := $(filter %.c, $(SRC))
 override ASM_SRC := $(filter %.asm, $(SRC))
 override OBJ := $(addprefix $(OBJ_DIR)/, $(C_SRC:.c=.c.o) $(ASM_SRC:.asm=.asm.o)) # remember to use the slash, otherwise the path gets formatted as ../../obj/boot./[file]
