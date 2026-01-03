@@ -32,12 +32,13 @@ The following will provide instructions and prerequisites to build the operating
 <br>Required libraries:</br>
 * `build-essential`
 * `git`
-* `make`
+* GNU-compatible make, such as `make` or `gmake`
 * A MinGW GCC cross-compiler
 * A GCC cross-compiler for your desired architecture (only x86-64 is currently supported)
 * `ld`
 * `qemu-system-[your arch]` for emulation
 * `bdf2psf` for building font assets
+* `python3` for scripts
 
 ### Building from source
 
@@ -49,8 +50,12 @@ The following will provide instructions and prerequisites to build the operating
     ```sh
     make submodules CPUS=$(nproc)
     ```
+3. Create a configuration to use for building
+	```sh
+	make defconfig
+	```
 
-3. Build the source
+4. Build the source
     ```sh
     make CPUS=$(nproc)
     ```
