@@ -18,7 +18,7 @@ void kernel_init(struct kernel_boot_params *params){
 	clear_screen(params->fb, COLOUR_RGB32(0, 0, 0));
 
 	kernel_heap_init(KERNEL_PAGE_SIZE_4K);
-	
+		
 	init_vfs_types();
 
 	struct superblock ramfs_superblock = {0};
@@ -32,7 +32,7 @@ void kernel_init(struct kernel_boot_params *params){
 	const char *test = "hello";
 	void *read = kernel_heap_alloc(string_len(test));
 	struct vfs_mount *mount = ramfs_mount(&ramfs_superblock, "/");
-	//ramfs_create(&ramfs_superblock, (char *)file_name, INODE_REGULAR_FILE, mount, NULL);
+	ramfs_create(&ramfs_superblock, (char *)file_name, INODE_REGULAR_FILE, mount, NULL);
 	//ramfs_write_file((char *)file_name, (void *)test, string_len((char *)test));
 	//ramfs_read_file((char *)file_name, (void *)read, string_len((char *)test));
 	

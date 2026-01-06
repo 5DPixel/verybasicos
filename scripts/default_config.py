@@ -22,7 +22,7 @@ options["log_quiet"] = 1
 options["skip_tool_check"] = 0
 
 if os.path.isdir("/sys/firmware/efi"):
-	options["is_efi"] = True
+	options["arch_boot_platform"] = "uefi"
 
 if os.path.isfile(path):
 	print("config already exists!")
