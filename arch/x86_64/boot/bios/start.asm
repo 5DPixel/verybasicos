@@ -1,0 +1,3 @@
+mov ah, 0x0E
+mov al, 'C'
+int 0x10

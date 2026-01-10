@@ -43,7 +43,9 @@ endef
 
 define log_if_notquiet
 	$(if $(filter $(LOG_QUIET), 1),
-		@echo $(2) # optional debug
+		$(if $(filter $(2), 1),
+			@echo $(2) # optional debug,
+		)
 		@$(1) 2>/dev/null 1>/dev/null,
 		$(1)
 	)
@@ -61,22 +63,8 @@ endef
 .PHONY: all
 all: $(OUTPUT_IMG)
 
-$(OUTPUT_IMG): GNUmakefile submodules
-	$(call log_if_notquiet, \
-		if [ ! -d $(CURDIR)/arch/$(ARCH)/boot/$(ARCH_BOOT_PLATFORM) ]; then \
-			echo "boot platform $(ARCH_BOOT_PLATFORM) for arch $(ARCH) doesn't exist..."; \
-		false; \
-		fi, \
-		"boot platform $(ARCH_BOOT_PLATFORM) for arch $(ARCH) doesn't exist...", \
-	)
-	@$(CURDIR)/scripts/check_tools.py --check-arch $(CURDIR)/arch $(ARCH)
-	$(call add_flag_if_quiet, \
-		$(MAKE) -C $(CURDIR)/arch/$(ARCH)/boot/$(ARCH_BOOT_PLATFORM) \
-			-j$(CPUS) TOOLCHAIN_PREFIX=$(BOOT_TOOLCHAIN_PREFIX) \
-			TOOLCHAIN=$(BOOT_TOOLCHAIN) LOG_QUIET=$(LOG_QUIET), \
-		 --no-print-directory -s \
-	)
-	$(call add_flag_if_quiet, $(MAKE) -C $(CURDIR)/arch/$(ARCH) -j$(CPUS) LOG_QUIET=$(LOG_QUIET), --no-print-directory -s)
+.PHONY: uefi-img
+uefi-img:
 	$(call log_if_notquiet, dd if=/dev/zero of=$(OUTPUT_ESP) bs=1k count=100000, "creating boot image...")
 	$(call log_if_notquiet, mkdosfs -F 32 $(OUTPUT_ESP), "created FAT32 filesystem on boot image...")
 	$(call log_if_notquiet, mmd -i $(OUTPUT_ESP) ::/EFI, "creating EFI root directory...")
@@ -109,6 +97,28 @@ $(OUTPUT_IMG): GNUmakefile submodules
 			iso, \
 		$(OUTPUT_IMG), \
 		iso \
+	)
+
+$(OUTPUT_IMG): GNUmakefile submodules
+	$(call log_if_notquiet, \
+		if [ ! -d $(CURDIR)/arch/$(ARCH)/boot/$(ARCH_BOOT_PLATFORM) ]; then \
+			echo "boot platform $(ARCH_BOOT_PLATFORM) for arch $(ARCH) doesn't exist..."; \
+		false; \
+		fi, \
+		"boot platform $(ARCH_BOOT_PLATFORM) for arch $(ARCH) doesn't exist...", \
+	)
+	@$(CURDIR)/scripts/check_tools.py --check-arch $(CURDIR)/arch $(ARCH)
+	$(call add_flag_if_quiet, \
+		$(MAKE) -C $(CURDIR)/arch/$(ARCH)/boot/$(ARCH_BOOT_PLATFORM) \
+			-j$(CPUS) TOOLCHAIN_PREFIX=$(BOOT_TOOLCHAIN_PREFIX) \
+			TOOLCHAIN=$(BOOT_TOOLCHAIN) LOG_QUIET=$(LOG_QUIET), \
+		 --no-print-directory -s \
+	)
+	$(call add_flag_if_quiet, $(MAKE) -C $(CURDIR)/arch/$(ARCH) -j$(CPUS) LOG_QUIET=$(LOG_QUIET), --no-print-directory -s)
+	$(call add_flag_if_quiet, \
+		$(MAKE) -C $(CURDIR) $(ARCH_BOOT_PLATFORM)-img # probably really bad code to make itself \
+			CPUS=$(CPUS), \
+		--no-print-directory -s \
 	)
 	@echo "build complete..."
 
@@ -157,7 +167,3 @@ submodules:
 defconfig:
 	@$(CURDIR)/scripts/default_config.py
 	@echo "generated default config..."
-
-.PHONY: img-uefi
-img-uefi:
-	
