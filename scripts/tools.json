@@ -7,5 +7,9 @@
 		
 	"make": {
 		"check_version": "--version"
+	},
+	
+	"xorriso": {
+		"check_version": "--version"
 	}
 }

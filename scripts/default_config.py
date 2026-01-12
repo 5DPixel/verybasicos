@@ -20,9 +20,15 @@ options["arch"] = subprocess.check_output([uname, "-m"], stderr=subprocess.DEVNU
 options["cpus"] = subprocess.check_output([nproc], stderr=subprocess.DEVNULL)
 options["log_quiet"] = 1
 options["skip_tool_check"] = 0
+options["boot_toolchain"] = ""
+options["boot_toolchain_prefix"] = ""
+
+if options["arch"] == b"x86_64\n":
+	options["arch_boot_platform"] = "bios"
 
 if os.path.isdir("/sys/firmware/efi"):
 	options["arch_boot_platform"] = "uefi"
+	options["boot_toolchain_prefix"] = "x86_64-w64-mingw32-"
 
 if os.path.isfile(path):
 	print("config already exists!")

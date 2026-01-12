@@ -5,8 +5,10 @@ override OUTPUT_IMG = $(CURDIR)/os.iso
 override OUTPUT_ESP = $(CURDIR)/build/boot/esp.img
 override OUTPUT_KERNEL = $(CURDIR)/build/kernel
 
+override OUTPUT_BOOT_SECT = $(CURDIR)/build/boot/boot_sect
+
 BOOT_TOOLCHAIN :=
-BOOT_TOOLCHAIN_PREFIX := x86_64-w64-mingw32-
+BOOT_TOOLCHAIN_PREFIX :=
 
 SKIP_TOOL_CHECK := 0
 
@@ -65,6 +67,7 @@ all: $(OUTPUT_IMG)
 
 .PHONY: uefi-img
 uefi-img:
+	@rm -f iso/*
 	$(call log_if_notquiet, dd if=/dev/zero of=$(OUTPUT_ESP) bs=1k count=100000, "creating boot image...")
 	$(call log_if_notquiet, mkdosfs -F 32 $(OUTPUT_ESP), "created FAT32 filesystem on boot image...")
 	$(call log_if_notquiet, mmd -i $(OUTPUT_ESP) ::/EFI, "creating EFI root directory...")
@@ -99,6 +102,27 @@ uefi-img:
 		iso \
 	)
 
+.PHONY: bios-img
+bios-img:
+	@rm -f iso/*
+	@mkdir -p iso
+	$(call log_if_notquiet, cp $(OUTPUT_KERNEL) iso)
+	$(call log_if_notquiet, cp $(FONT_OUT) spleen.psf)
+	$(call log_if_notquiet, cp $(OUTPUT_BOOT_SECT) iso/boot_sect)
+	$(call log_if_notquiet, truncate -s 1474560 iso/boot_sect)
+	$(call log_step, \
+		xorriso \
+			-as mkisofs \
+			-volid "VERYBASICOS" \
+			-b boot_sect \
+			-no-emul-boot \
+			-boot-load-size 4 \
+			-o $(OUTPUT_IMG) \
+			iso, \
+		$(OUTPUT_IMG), \
+		iso \
+	)
+
 $(OUTPUT_IMG): GNUmakefile submodules
 	$(call log_if_notquiet, \
 		if [ ! -d $(CURDIR)/arch/$(ARCH)/boot/$(ARCH_BOOT_PLATFORM) ]; then \
@@ -116,7 +140,9 @@ $(OUTPUT_IMG): GNUmakefile submodules
 	)
 	$(call add_flag_if_quiet, $(MAKE) -C $(CURDIR)/arch/$(ARCH) -j$(CPUS) LOG_QUIET=$(LOG_QUIET), --no-print-directory -s)
 	$(call add_flag_if_quiet, \
-		$(MAKE) -C $(CURDIR) $(ARCH_BOOT_PLATFORM)-img # probably really bad code to make itself \
+		$(MAKE) \
+			$(ARCH_BOOT_PLATFORM)-img \
+			 LOG_QUIET=$(LOG_QUIET) # probably really bad code to make itself \
 			CPUS=$(CPUS), \
 		--no-print-directory -s \
 	)

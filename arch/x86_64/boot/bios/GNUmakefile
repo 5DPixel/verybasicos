@@ -3,9 +3,9 @@
 BUILD_DIR := $(CURDIR)/../../../../build/boot
 OBJ_DIR := $(CURDIR)/../../../../obj/boot
 INCLUDE_DIR := $(CURDIR)/../../../../include
-GNU_EFI_SUBMODULE = $(CURDIR)/../../../../gnu-efi
 
-override OUTPUT_BINARY := $(BUILD_DIR)/boot.efi
+override OUTPUT_MBR := $(BUILD_DIR)/boot_sect
+override OUTPUT_BINARY := $(BUILD_DIR)/boot
 
 TOOLCHAIN :=
 TOOLCHAIN_PREFIX :=
@@ -32,6 +32,7 @@ endif
 CFLAGS := -g -O2 -pipe
 CPPFLAGS :=
 LDFLAGS :=
+FASMFLAGS :=
 
 LOG_QUIET := 1
 
@@ -73,13 +74,9 @@ override CFLAGS += \
     -mno-red-zone
 
 override CPPFLAGS := \
-	-I$(GNU_EFI_SUBMODULE)/inc \
-	-I$(GNU_EFI_SUBMODULE)/inc/x86_64 \
-	-I$(GNU_EFI_SUBMODULE)/inc/protocol \
 	-I$(INCLUDE_DIR)/x86_64/boot \
 	-I$(INCLUDE_DIR)/shared \
     $(CPPFLAGS) \
-	-DEFI_FUNCTION_WRAPPER \
     -MMD \
     -MP
 
@@ -89,11 +86,15 @@ override LDFLAGS += \
     -static \
     -z max-page-size=0x1000 \
     --gc-sections \
-    -T $(LINKER_SCRIPT)
+    #-T $(LINKER_SCRIPT)
 
-override SRC := $(shell find $(CURDIR)/../../../shared/boot/uefi $(CURDIR)/../../../shared/boot/shared -type f 2>/dev/null | LC_ALL=C sort)
+BOOT_ENTRY_ASM_FILE := $(CURDIR)/start.asm
+
+override SRC := $(shell find $(CURDIR)/../../../shared/boot/bios $(CURDIR)/../../../shared/boot/shared -type f 2>/dev/null | LC_ALL=C sort)
 override C_SRC := $(filter %.c, $(SRC))
-override OBJ := $(addprefix $(OBJ_DIR)/, $(C_SRC:.c=.c.o)) # remember to use the slash, otherwise the path gets formatted as ../../obj/boot./[file]
+override ASM_SRC := $(filter %.asm, $(SRC))
+ASM_SRC := $(filter-out $(BOOT_ENTRY_ASM_FILE), $(ASM_SRC))
+override OBJ := $(addprefix $(OBJ_DIR)/, $(C_SRC:.c=.c.o) $(ASM_SRC:.asm=.asm.o)) # remember to use the slash, otherwise the path gets formatted as ../../obj/boot./[file]
 override HEADER_DEPS := $(addprefix $(OBJ_DIR), $(C_SRC:.c=.c.d))
 
 .PHONY: all
@@ -101,8 +102,14 @@ all: $(OUTPUT_BINARY)
 
 -include $(HEADER_DEPS)
 
-$(OUTPUT_BINARY): GNUmakefile $(OBJ)
+$(OUTPUT_BINARY): GNUmakefile $(OBJ) $(BOOT_ENTRY_ASM_FILE)
 	@mkdir -p "$(dir $@)"
+	$(call log_step, \
+		fasm $(BOOT_ENTRY_ASM_FILE) $(OUTPUT_MBR), \
+		$(BOOT_ENTRY_ASM_FILE), \
+		$(OUTPUT_MBR) \
+	)
+	
 	$(call log_step, \
 		$(LD) $(LDFLAGS) $(OBJ) -o $@, \
 		$(OBJ), \
@@ -115,6 +122,14 @@ $(OBJ_DIR)/%.c.o: %.c GNUmakefile
 		$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@, \
 		$<, \
 		$@ \
+	)
+
+$(OBJ_DIR)/%.asm.o: %.asm GNUmakefile
+	@mkdir -p "$(dir $@)"
+	$(call log_step, \
+		fasm $(FASMFLAGS) $< $@, \
+		$<, \
+		$@
 	)
 
 .PHONY: clean

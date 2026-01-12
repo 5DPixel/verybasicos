@@ -1,9 +1,6 @@
 #include <elf.h>
-#include <boot/uefi/const.h>
 #include <common.h>
-#include <boot/uefi/common.h>
 #include <boot/shared/platform.h>
-#include <boot/uefi/framebuffer.h>
 #include <boot/shared/psf.h>
 #include <boot/shared/menu.h>
 #include <boot/shared/common.h>
