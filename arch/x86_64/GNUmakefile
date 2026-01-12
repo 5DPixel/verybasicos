@@ -103,7 +103,7 @@ all: $(OUTPUT_BINARY)
 
 -include $(HEADER_DEPS)
 
-$(OUTPUT_BINARY): GNUmakefile $(LINKER_SCRIPT) $(OBJ)
+$(OUTPUT_BINARY): GNUmakefile $(LINKER_SCRIPT) $(OBJ) lib
 	@mkdir -p "$(dir $@)"
 	$(call log_step, \
 		$(RUSTC) $(RUSTFLAGS) $(CURDIR)/../shared/rust/lib.rs -o $(OBJ_DIR)/libkernel_rs.a, \
@@ -112,7 +112,7 @@ $(OUTPUT_BINARY): GNUmakefile $(LINKER_SCRIPT) $(OBJ)
 	)
 	
 	$(call log_step, \
-		$(LD) $(LDFLAGS) $(OBJ) $(OBJ_DIR)/libkernel_rs.a -o $@, \
+		$(LD) $(LDFLAGS) $(OBJ_DIR)/libkernel.a $(OBJ_DIR)/libkernel_rs.a -o $@, \
 		$(OBJ) $(OBJ_DIR)/libkernel_rs.a, \
 		$@ \
 	)
@@ -133,7 +133,11 @@ $(OBJ_DIR)/%.asm.o: %.asm GNUmakefile
 		$@ \
 	)
 
+.PHONY: lib
+lib: GNUmakefile $(OBJ)
+	$(AR) rcs $(OBJ_DIR)/libkernel.a $(OBJ)
+
 .PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR) $(OBJ_DIR)
-	rm $(OBJ_DIR)/libkernel_rs.a
+	rm -f $(OBJ_DIR)/libkernel_rs.a

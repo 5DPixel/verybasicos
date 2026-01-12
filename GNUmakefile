@@ -115,7 +115,6 @@ bios-img:
 			-as mkisofs \
 			-volid "VERYBASICOS" \
 			-b boot_sect \
-			-no-emul-boot \
 			-boot-load-size 4 \
 			-o $(OUTPUT_IMG) \
 			iso, \
@@ -123,7 +122,10 @@ bios-img:
 		iso \
 	)
 
-$(OUTPUT_IMG): GNUmakefile submodules
+$(CURDIR)/obj/libkernel.a: GNUmakefile
+	$(call add_flag_if_quiet, $(MAKE) -C $(CURDIR)/arch/$(ARCH) -j$(CPUS) LOG_QUIET=$(LOG_QUIET), --no-print-directory -s)
+
+$(OUTPUT_IMG): GNUmakefile submodules $(CURDIR)/obj/libkernel.a
 	$(call log_if_notquiet, \
 		if [ ! -d $(CURDIR)/arch/$(ARCH)/boot/$(ARCH_BOOT_PLATFORM) ]; then \
 			echo "boot platform $(ARCH_BOOT_PLATFORM) for arch $(ARCH) doesn't exist..."; \
@@ -138,7 +140,6 @@ $(OUTPUT_IMG): GNUmakefile submodules
 			TOOLCHAIN=$(BOOT_TOOLCHAIN) LOG_QUIET=$(LOG_QUIET), \
 		 --no-print-directory -s \
 	)
-	$(call add_flag_if_quiet, $(MAKE) -C $(CURDIR)/arch/$(ARCH) -j$(CPUS) LOG_QUIET=$(LOG_QUIET), --no-print-directory -s)
 	$(call add_flag_if_quiet, \
 		$(MAKE) \
 			$(ARCH_BOOT_PLATFORM)-img \

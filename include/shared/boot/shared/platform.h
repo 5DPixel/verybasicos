@@ -56,6 +56,7 @@ enum platform_type {
 	PLATFORM_UEFI = 1
 };
 
+/* platform-specific functions */
 void *platform_alloc(struct platform_model *model, size_t size);
 void platform_alloc_pages(struct platform_model *model, int page_count, uint64_t addr);
 void platform_free(struct platform_model *model, void *ptr);
@@ -64,12 +65,13 @@ void platform_exit(struct platform_model *model);
 struct framebuffer *platform_display_attributes(struct platform_model *model);
 struct mmap_entry *platform_get_mmap_entries(struct platform_model *model, int *mmap_entry_count);
 uint8_t *platform_read_file(struct platform_model *model, const char *file_name, uint32_t *size);
+void init_platform(void *ctx, const char *font_file_path, const char *kernel_file_path, struct platform_model *model);
+enum platform_type platform(struct platform_model *model);
+enum key get_key(struct platform_model *model); /* polling, this function should later be prefixed with platform_ */
+
 void set_text_attr(struct platform_model *model, uint32_t text_attr);
 void plot_pixel_32bpp(struct platform_model *model, int x, int y, uint32_t colour);
-void init_platform(void *ctx, const char *font_file_path, const char *kernel_file_path, struct platform_model *model);
 void open_font_file(struct platform_model *model, const char *file);
-enum key get_key(struct platform_model *model); /* polling */
-enum platform_type platform(struct platform_model *model);
 void log(struct platform_model *model, char *message, enum log_severity severity);
 void font_dimensions(struct platform_model *model, int *width, int *height);
 void clear_screen(struct platform_model *model, uint32_t colour);

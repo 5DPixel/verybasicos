@@ -48,6 +48,7 @@ gdt:
 	.end:
 
 gdt_desc: dw gdt.end - gdt - 1
+gdt_label: dd gdt
 
 section '.bss'
 stack_begin:

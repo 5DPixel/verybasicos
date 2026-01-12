@@ -102,7 +102,7 @@ all: $(OUTPUT_BINARY)
 
 -include $(HEADER_DEPS)
 
-$(OUTPUT_BINARY): GNUmakefile $(OBJ) $(BOOT_ENTRY_ASM_FILE)
+$(OUTPUT_BINARY): GNUmakefile $(OBJ) $(BOOT_ENTRY_ASM_FILE) $(OBJ_DIR)/../libkernel.a
 	@mkdir -p "$(dir $@)"
 	$(call log_step, \
 		fasm $(BOOT_ENTRY_ASM_FILE) $(OUTPUT_MBR), \
