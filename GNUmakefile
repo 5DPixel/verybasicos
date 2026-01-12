@@ -106,8 +106,8 @@ uefi-img:
 bios-img:
 	@rm -f iso/*
 	@mkdir -p iso
-	$(call log_if_notquiet, cp $(OUTPUT_KERNEL) iso)
-	$(call log_if_notquiet, cp $(FONT_OUT) spleen.psf)
+	$(call log_if_notquiet, cp $(OUTPUT_KERNEL) iso/)
+	$(call log_if_notquiet, cp $(FONT_OUT) iso/spleen.psf)
 	$(call log_if_notquiet, cp $(OUTPUT_BOOT_SECT) iso/boot_sect)
 	$(call log_if_notquiet, truncate -s 1474560 iso/boot_sect)
 	$(call log_step, \
