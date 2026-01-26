@@ -13,6 +13,11 @@ enum mem_type {
 	MEM_BAD
 };
 
+struct acpi_table {
+	uintptr_t acpi_start;
+	uint32_t acpi_revision;
+};
+
 struct mmap_entry {
 	uint64_t phys_base;
 	uint64_t virt_base;
@@ -25,7 +30,7 @@ struct kernel_boot_params {
 	struct framebuffer *fb;
 	uint32_t mem_region_count;
 	struct mmap_entry *mem_regions;
-	uintptr_t acpi_start;
+	struct acpi_table *acpi;
 } __attribute__((packed));
 
 void kernel_init(struct kernel_boot_params *params);

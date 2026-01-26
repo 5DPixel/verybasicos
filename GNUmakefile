@@ -1,11 +1,11 @@
 .SUFFIXES:
 
-override OUTPUT_BOOTLOADER = $(CURDIR)/build/boot/boot.efi
-override OUTPUT_IMG = $(CURDIR)/os.iso
-override OUTPUT_ESP = $(CURDIR)/build/boot/esp.img
-override OUTPUT_KERNEL = $(CURDIR)/build/kernel
+override OUTPUT_BOOTLOADER = build/boot/boot.efi
+override OUTPUT_IMG = os.iso
+override OUTPUT_ESP = build/boot/esp.img
+override OUTPUT_KERNEL = build/kernel
 
-override OUTPUT_BOOT_SECT = $(CURDIR)/build/boot/boot_sect
+override OUTPUT_BOOT_SECT = build/boot/boot_sect
 
 BOOT_TOOLCHAIN :=
 BOOT_TOOLCHAIN_PREFIX :=
@@ -17,8 +17,8 @@ CPUS := 1
 KERNEL_TOOLCHAIN :=
 KERNEL_TOOLCHAIN_PREFIX :=
 FONT_NAME := spleen-8x16.bdf
-FONT := $(addprefix $(CURDIR)/spleen/, $(FONT_NAME))
-FONT_OUT := $(addprefix $(CURDIR)/assets/fonts/, $(FONT_NAME:.bdf=.psf))
+FONT := $(addprefix spleen/, $(FONT_NAME))
+FONT_OUT := $(addprefix assets/fonts/, $(FONT_NAME:.bdf=.psf))
 
 ifeq ($(ARCH_EXISTS), 0)
 	$(error "Arch $(ARCH) doesn't exist, specify another!")
@@ -66,7 +66,7 @@ endef
 all: $(OUTPUT_IMG)
 
 .PHONY: uefi-img
-uefi-img:
+uefi-img: $(OUTPUT_KERNEL) obj/libkernel.a
 	@rm -f iso/*
 	$(call log_if_notquiet, dd if=/dev/zero of=$(OUTPUT_ESP) bs=1k count=100000, "creating boot image...")
 	$(call log_if_notquiet, mkdosfs -F 32 $(OUTPUT_ESP), "created FAT32 filesystem on boot image...")
@@ -103,13 +103,16 @@ uefi-img:
 	)
 
 .PHONY: bios-img
-bios-img:
+bios-img: $(OUTPUT_KERNEL) obj/libkernel.a build/boot/boot
 	@rm -f iso/*
 	@mkdir -p iso
 	$(call log_if_notquiet, cp $(OUTPUT_KERNEL) iso/)
 	$(call log_if_notquiet, cp $(FONT_OUT) iso/spleen.psf)
+	@cat $(CURDIR)/build/boot/boot >> $(OUTPUT_BOOT_SECT) # log if not quiet suppresses streams
+	#$(call log_if_notquiet, truncate -s 8192 iso/boot_sect) # truncate to append
+	#@cat $(CURDIR)/build/boot/boot_stage2 >> iso/boot_sect
+	$(call log_if_notquiet, truncate -s 1474560 $(OUTPUT_BOOT_SECT))
 	$(call log_if_notquiet, cp $(OUTPUT_BOOT_SECT) iso/boot_sect)
-	$(call log_if_notquiet, truncate -s 1474560 iso/boot_sect)
 	$(call log_step, \
 		xorriso \
 			-as mkisofs \
@@ -122,10 +125,13 @@ bios-img:
 		iso \
 	)
 
-$(CURDIR)/obj/libkernel.a: GNUmakefile
+# TODO: cat the ELF stage 2 binary at a specified offset and change sources
+
+obj/libkernel.a: GNUmakefile
 	$(call add_flag_if_quiet, $(MAKE) -C $(CURDIR)/arch/$(ARCH) -j$(CPUS) LOG_QUIET=$(LOG_QUIET), --no-print-directory -s)
 
-$(OUTPUT_IMG): GNUmakefile submodules $(CURDIR)/obj/libkernel.a
+# the main target
+$(OUTPUT_IMG): GNUmakefile submodules obj/libkernel.a
 	$(call log_if_notquiet, \
 		if [ ! -d $(CURDIR)/arch/$(ARCH)/boot/$(ARCH_BOOT_PLATFORM) ]; then \
 			echo "boot platform $(ARCH_BOOT_PLATFORM) for arch $(ARCH) doesn't exist..."; \
@@ -172,8 +178,8 @@ distclean:
 
 .PHONY: submodules
 submodules:
-	@$(if $(filter $(SKIP_TOOL_CHECK),0), $(CURDIR)/scripts/check_tools.py --exit,)
-	$(call add_flag_if_quiet, $(MAKE) -C gnu-efi -j$(CPUS), --no-print-directory -s)
+	@$(if $(filter $(SKIP_TOOL_CHECK),0), scripts/check_tools.py --exit,)
+	$(call add_flag_if_quiet, $(MAKE) -C $(CURDIR)/gnu-efi -j$(CPUS), --no-print-directory -s)
 	@mkdir -p assets/fonts
 	$(call log_step, \
 		bdf2psf --fb $(FONT) \
@@ -192,5 +198,5 @@ submodules:
 
 .PHONY: defconfig
 defconfig:
-	@$(CURDIR)/scripts/default_config.py
+	@scripts/default_config.py
 	@echo "generated default config..."

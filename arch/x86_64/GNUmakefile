@@ -1,11 +1,11 @@
 .SUFFIXES:
 
-BUILD_DIR := $(CURDIR)/../../build
-OBJ_DIR := $(CURDIR)/../../obj
-INCLUDE_DIR := $(CURDIR)/../../include
+BUILD_DIR := ../../build
+OBJ_DIR := ../../obj
+INCLUDE_DIR := ../../include
 
 override OUTPUT_BINARY := $(BUILD_DIR)/kernel
-override LINKER_SCRIPT := $(CURDIR)/kernel.ld
+override LINKER_SCRIPT := kernel.ld
 
 TOOLCHAIN :=
 TOOLCHAIN_PREFIX :=
@@ -92,7 +92,7 @@ override LDFLAGS += \
     -T $(LINKER_SCRIPT)
 
 override SRC := $(realpath $(shell find -type f 2>/dev/null -not -path "./boot/*" | LC_ALL=C sort))
-override SRC += $(realpath $(shell find $(CURDIR)/../shared -type f 2>/dev/null -not -path "$(CURDIR)/../shared/boot/*" | LC_ALL=C sort))
+override SRC += $(realpath $(shell find ../shared -type f 2>/dev/null -not -path "../shared/boot/*" | LC_ALL=C sort))
 override C_SRC := $(filter %.c, $(SRC))
 override ASM_SRC := $(filter %.asm, $(SRC))
 override OBJ := $(addprefix $(OBJ_DIR)/, $(C_SRC:.c=.c.o) $(ASM_SRC:.asm=.asm.o)) # remember to use the slash, otherwise the path gets formatted as ../../obj/boot./[file]
@@ -106,8 +106,8 @@ all: $(OUTPUT_BINARY)
 $(OUTPUT_BINARY): GNUmakefile $(LINKER_SCRIPT) $(OBJ) lib
 	@mkdir -p "$(dir $@)"
 	$(call log_step, \
-		$(RUSTC) $(RUSTFLAGS) $(CURDIR)/../shared/rust/lib.rs -o $(OBJ_DIR)/libkernel_rs.a, \
-		$(CURDIR)/../shared/rust/lib.rs, \
+		$(RUSTC) $(RUSTFLAGS) ../shared/rust/lib.rs -o $(OBJ_DIR)/libkernel_rs.a, \
+		../shared/rust/lib.rs, \
 		$(OBJ_DIR)/libkernel_rs.a \
 	)
 	

@@ -1,9 +1,9 @@
 .SUFFIXES:
 
-BUILD_DIR := $(CURDIR)/../../../../build/boot
-OBJ_DIR := $(CURDIR)/../../../../obj/boot
-INCLUDE_DIR := $(CURDIR)/../../../../include
-GNU_EFI_SUBMODULE = $(CURDIR)/../../../../gnu-efi
+BUILD_DIR := ../../../../build/boot
+OBJ_DIR := ../../../../obj/boot
+INCLUDE_DIR := ../../../../include
+GNU_EFI_SUBMODULE = ../../../../gnu-efi
 
 override OUTPUT_BINARY := $(BUILD_DIR)/boot.efi
 
@@ -86,7 +86,7 @@ override LDFLAGS += \
 	-lgnuefi \
 	-lefi
 
-override SRC := $(shell find $(CURDIR)/../../../shared/boot/uefi $(CURDIR)/../../../shared/boot/shared -type f 2>/dev/null | LC_ALL=C sort)
+override SRC := $(shell find ../../../shared/boot/uefi ../../../shared/boot/shared -type f 2>/dev/null | LC_ALL=C sort)
 override C_SRC := $(filter %.c, $(SRC))
 override OBJ := $(addprefix $(OBJ_DIR)/, $(C_SRC:.c=.c.o)) # remember to use the slash, otherwise the path gets formatted as ../../obj/boot./[file]
 override HEADER_DEPS := $(addprefix $(OBJ_DIR), $(C_SRC:.c=.c.d))

@@ -5,4 +5,8 @@
 - I/O operations on files in VFSs
 - Hashing
 - Pool page orders are 0, why?
-- BIOS boot platform GNUmakefile
+- Using the compiled stage 2 !!
+- Eliminate excessive $(CURDIR)
+- libc
+- Update some things to const now that I actually know what it means, like string length
+- UEFI not working?!

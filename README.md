@@ -29,6 +29,8 @@ __   _____ _ __ _   _| |__   __ _ ___(_) ___ ___  ___
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
+IMPORTANT: This project has been archived in preference for systems aligning more with the project's philosophy; all new work will be maintained at [codeberg link](https://codeberg.org/judeuwucute/verybasicos)
+
 A "very basic" `x86_64` operating system supporting both legacy BIOS and UEFI systems, written by one person.
 
 <!-- GETTING STARTED -->

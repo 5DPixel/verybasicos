@@ -33,6 +33,7 @@ void start_default_boot(struct platform_model *model){
 	struct kernel_boot_params *params = model->alloc_conventional(model, sizeof(struct kernel_boot_params));
 	params->fb = model->alloc_conventional(model, sizeof(struct framebuffer));
 	params->font = model->alloc_conventional(model, model->font_length);
+	//params->acpi = model->get_acpi(model);
 
 	memcpy(params->fb, model->display_attributes(model), sizeof(struct framebuffer));
 	memcpy(params->font, model->font, model->font_length);

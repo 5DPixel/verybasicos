@@ -81,6 +81,31 @@ uint8_t *platform_read_file(struct platform_model *model, const char *file_name,
 	return file_buffer;
 }
 
+#define EFI_ACPI_TABLE_GUID \
+	{0x8868e871,0xe4f1,0x11d3,\
+	{0xbc,0x22,0x00,0x80,0xc7,0x3c,0x88,0x81}}
+
+struct acpi_table *platform_get_acpi(struct platform_model *model){
+	struct uefi_boot_resources *resources = model->ctx;
+	/* config table variable */
+	//EFI_CONFIGURATION_TABLE *config_tables = resources->gST->ConfigurationTable;
+	//struct acpi_table *table = (struct acpi_table *)model->alloc(model, sizeof(struct acpi_table));
+	//int i;
+	//EFI_GUID acpi_guid = EFI_ACPI_TABLE_GUID;
+	
+	/* loop through VendorTable s to find the ACPI one */
+	//for(i = 0; i < (int)resources->gST->NumberOfTableEntries; i++){
+		//if(memcmp(&config_tables[i].VendorGuid, &acpi_guid, 16)){
+			//table->acpi_revision = 20;
+			//table->acpi_start = (uintptr_t)config_tables[i].VendorTable;
+		//}
+	//}
+	
+	//return table;
+}
+
+#undef EFI_ACPI_TABLE_GUID
+
 struct mmap_entry *platform_get_mmap_entries(struct platform_model *model, int *mmap_entry_count){
 	struct uefi_boot_resources *resources = model->ctx;
 	int i;
@@ -191,6 +216,7 @@ void init_platform(void *ctx, const char *font_file_path, const char *kernel_fil
 	model->plot32 = plot_pixel_32bpp;
 	model->display_attributes = platform_display_attributes;
 	model->mmap_entries = platform_get_mmap_entries;
+	model->get_acpi = platform_get_acpi;
 	model->exit = platform_exit;
 	model->get_key = get_key;
 	model->platform = platform;

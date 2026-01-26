@@ -39,6 +39,10 @@ start:
 	mov fs, ax
 	mov gs, ax
 	
+	mov ah, 0x00 ; clear VGA text
+	mov ah, 0x03
+	int 0x10
+	
 	jmp switch_to_protected_mode
 	
 	jmp $
@@ -57,7 +61,7 @@ kernel_code_segment_access_byte equ 0x9A
 kernel_code_segment_flags equ 0xCF
 
 kernel_data_segment_access_byte equ 0x92
-kernel_data_segment_flags equ 0xCF ; 0xE << 4
+kernel_data_segment_flags equ 0xCF
 
 kernel_code_segment_limit_and_flags equ 0xFE
 kernel_data_segment_limit_and_flags equ 0xFE
@@ -97,14 +101,8 @@ switch_to_protected_mode:
 	or al, 1 ; set PE
 	mov cr0, eax
 	
-	mov esp, stack_end
-	
-	jmp gdt_32_code:protected_main
-	hlt
+	jmp gdt_32_code:0x7E00
+	jmp $
 
-protected_main:
-	hlt
-
-stack_begin:
-	rb 4096
-stack_end:
+times 510 - ($ - $$) db 0
+dw 0xAA55

@@ -29,6 +29,7 @@ struct platform_model {
 	void (*write)(struct platform_model *model, const char *message, struct text_attributes *attr);
 	void (*log)(struct platform_model *model, char *message, enum log_severity severity);
 	void (*font_dimensions)(struct platform_model *model, int *width, int *height);
+	struct acpi_table *(*get_acpi)(struct platform_model *model);
 	struct mmap_entry *(*mmap_entries)(struct platform_model *model, int *mmap_entry_count);
 	uint8_t *(*read_file)(struct platform_model *model, const char *file_name, uint32_t *size);
 	void (*plot32)(struct platform_model *model, int x, int y, uint32_t colour);
@@ -62,6 +63,7 @@ void platform_alloc_pages(struct platform_model *model, int page_count, uint64_t
 void platform_free(struct platform_model *model, void *ptr);
 void platform_write(struct platform_model *model, const char *message, struct text_attributes *attr);
 void platform_exit(struct platform_model *model);
+struct acpi_table *platform_get_acpi(struct platform_model *model);
 struct framebuffer *platform_display_attributes(struct platform_model *model);
 struct mmap_entry *platform_get_mmap_entries(struct platform_model *model, int *mmap_entry_count);
 uint8_t *platform_read_file(struct platform_model *model, const char *file_name, uint32_t *size);
